@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giggle Search</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            color: #202124;
+            line-height: 1.34;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #homePage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+
+            font-family: Poppins;
+            font-weight: 600;
+
+        }
+
+        #resultsPage {
+            display: none;
+            flex-direction: column;
+        }
+
+        #websitePage {
+            display: none;
+            font-size: 80px;
+            font-weight: 500;
+            margin-bottom: 25px;
+            cursor: pointer;
+            letter-spacing: -1.5px;
+            font-family: "Roboto";
+            font-weight: 900;
+            font-weight: 500;
+            margin-bottom: 25px;
+            cursor: pointer;
+            letter-spacing: -1.5px;
+        }
+
+        .header-logo {
+            font-size: 30px;
+            font-weight: 500;
+            margin-right: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .g1 {
+            color: #4285f4;
+        }
+
+        .g2 {
+            color: #ea4335;
+        }
+
+        .g3 {
+            color: #fbbc05;
+        }
+
+        .g4 {
+            color: #4285f4;
+        }
+
+        .g5 {
+            color: #34a853;
+        }
+
+
+        .g6 {
+            color: #ea4335;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 584px;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 5px 15px;
+            height: 44px;
+            box-shadow: none;
+            background-color: white;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .logo {
+            font-size: 7rem;
+            font-weight: 600;
+            line-height: 0;
+            padding: 0;
+        }
+
+        .search-box:hover,
+        .search-box:focus-within {
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+            border-color: rgba(223, 225, 229, 0);
+        }
+
+        .search-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 5px 0;
+            color: #202124;
+        }
+
+        .search-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #f8f9fa;
+            padding: 9px 16px;
+            margin: 11px 4px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #3c4043;
+            cursor: pointer;
+            height: 36px;
+            min-width: 54px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-btn:hover {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            color: #202124;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px 0;
+            border-bottom: 1px solid #ebebeb;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 100;
+        }
+
+        .header .search-container {
+            margin-bottom: 0;
+        }
+
+        .header .search-box {
+            height: 46px;
+            max-width: 692px;
+        }
+
+        .search-results {
+            margin: 0 2rem;
+            padding: 0 20px;
+            max-width: 652px;
+        }
+
+        .results-stats {
+            font-size: 14px;
+            color: #70757a;
+            margin: 12px 0;
+        }
+
+        .result-item {
+            margin-bottom: 30px;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .result-url {
+            display: flex;
+            align-items: center;
+            color: #202124;
+            font-size: 14px;
+            line-height: 20px;
+            white-space: nowrap;
+            margin-bottom: 3px;
+        }
+
+        .url-path {
+            color: #5f6368;
+        }
+
+        .result-favicon {
+            height: 16px;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .result-title {
+            color: #1a0dab;
+            font-size: 20px;
+            margin: 0;
+            font-weight: 400;
+            line-height: 1.3;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-title:visited {
+            color: #681da8;
+        }
+
+        .result-description {
+            color: #4d5156;
+            font-size: 14px;
+            line-height: 1.58;
+            word-wrap: break-word;
+            margin: 3px 0 0;
+        }
+
+        .back-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #3c4043;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .website-content {
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            padding: 25px;
+            background-color: white;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+        }
+
+        .tabs-container {
+            border-bottom: 1px solid #ebebeb;
+            margin: 0 3rem;
+            max-width: 652px;
+            padding: 0 0;
+        }
+
+        .tabs {
+            display: flex;
+            height: 48px;
+            align-items: center;
+        }
+
+        .tab {
+            padding: 0 16px;
+            height: 100%;
+            line-height: 48px;
+            font-size: 14px;
+            color: #5f6368;
+            cursor: pointer;
+            position: relative;
+            margin-right: 1px;
+        }
+
+        .tab.active {
+            color: #4285f4;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #4285f4;
+        }
+
+        .tab:first-child {
+            padding-left: 0;
+        }
+
+        .customize-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer {
+            background-color: #f2f2f2;
+            padding: 15px;
+            border-top: 1px solid #e4e4e4;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #70757a;
+        }
+
+        .footer-links {
+            display: flex;
+        }
+
+        .footer-links a {
+            margin-right: 24px;
+            color: #70757a;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-left,
+        .footer-right {
+            display: flex;
+        }
+
+        .footer-right a {
+            margin-left: 24px;
+            margin-right: 0;
+        }
+
+        .mic-icon,
+        .search-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .search-icon {
+            margin-right: 12px;
+        }
+
+        .mic-icon {
+            margin-left: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="homePage">
+            <h1 class="logo">
+                <span class="g1">G</span><span class="g2">i</span><span class="g3">g</span><span
+                    class="g4">g</span><span class="g5">l</span><span class="g6">e</span>
+            </h1>
+            <div class="search-container">
+                <div class="search-box">
+                    <div class="search-icon">
+                        <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20"
+                            height="20">
+                            <path fill="#9aa0a6"
+                                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
+                            </path>
+                        </svg>
+                    </div>
+                    <input type="text" class="search-input" id="homeSearchInput" placeholder="">
+                    <div class="mic-icon">
+                        <svg focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24">
+                            <path fill="#4285f4"
+                                d="M12 15c1.66 0 3-1.31 3-2.97V5.97C15 4.31 13.66 3 12 3S9 4.31 9 5.97v6.06c0 1.66 1.34 2.97 3 2.97z">
+                            </path>
+                            <path fill="#34a853" d="M11 18.08h2V21h-2z"></path>
+                            <path fill="#fbbc05"
+                                d="M7.05 16.87C5.78 15.54 5 14.04 5 12h2c0 1.45.56 2.42 1.47 3.38v.32l-1.15 1.18z">
+                            </path>
+                            <path fill="#ea4335"
+                                d="M12 16.93a4.97 5.25 0 0 1-3.54-1.55l-1.41 1.49A6.78 7.58 0 0 0 12 19c3.73 0 6.84-2.55 6.84-7h-2c0 3.1-1.9 5.93-4.84 5.93z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="search-btn" onclick="performSearch()">Giggle Search</button>
+                <button class="search-btn">I'm Feeling Lucky</button>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div id="resultsPage">
+            <div class="header">
+                <div class="header-logo" onclick="goToHome()">
+                    <span class="g1">G</span><span class="g2">i</span><span class="g3">g</span><span
+                        class="g4">g</span><span class="g5">l</span><span class="g6">e</span>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <div class="search-icon">
+                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20"
+                                height="20">
+                                <path fill="#9aa0a6"
+                                    d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
+                                </path>
+                            </svg>
+                        </div>
+                        <input type="text" class="search-input" id="resultsSearchInput">
+                        <div class="mic-icon">
+                            <svg focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24"
+                                height="24">
+                                <path fill="#4285f4"
+                                    d="M12 15c1.66 0 3-1.31 3-2.97V5.97C15 4.31 13.66 3 12 3S9 4.31 9 5.97v6.06c0 1.66 1.34 2.97 3 2.97z">
+                                </path>
+                                <path fill="#34a853" d="M11 18.08h2V21h-2z"></path>
+                                <path fill="#fbbc05"
+                                    d="M7.05 16.87C5.78 15.54 5 14.04 5 12h2c0 1.45.56 2.42 1.47 3.38v.32l-1.15 1.18z">
+                                </path>
+                                <path fill="#ea4335"
+                                    d="M12 16.93a4.97 5.25 0 0 1-3.54-1.55l-1.41 1.49A6.78 7.58 0 0 0 12 19c3.73 0 6.84-2.55 6.84-7h-2c0 3.1-1.9 5.93-4.84 5.93z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tabs">
+                    <div class="tab active">
+
+                        All
+                    </div>
+                    <div class="tab">
+                        Images
+                    </div>
+                    <div class="tab">
+                        Videos
+                    </div>
+                    <div class="tab">
+                        News
+                    </div>
+                    <div class="tab">
+                        Maps
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-results" id="searchResults">
+                <!-- Search results will be populated here -->
+                <div class="results-stats" id="resultsStats">About 8,830,000 results (0.54 seconds)</div>
+                <!-- Results will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Website Page -->
+        <div id="websitePage">
+            <button class="back-btn" onclick="goBack()">← Back to results</button>
+            <div class="website-content" id="websiteContent">
+                <!-- Website content will be populated here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-links">
+                        <a href="#">About</a>
+                        <a href="#">Advertising</a>
+                        <a href="#">Business</a>
+                        <a href="#">How Search works</a>
+                    </div>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-links">
+                        <a href="#">Privacy</a>
+                        <a href="#">Terms</a>
+                        <a href="#">Settings</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Customize button -->
+    <button class="customize-btn" onclick="alert('Customization panel would open here')">⚙️</button>
+
+    <script>
+        // Sample search results data
+        const sampleResults = [
+            {
+                url: "www.techworld.com/latest-gadgets",
+                favicon: "https://www.google.com/s2/favicons?domain=techworld.com",
+                title: "Latest Technology Gadgets and Innovations - TechWorld",
+                description: "Discover the newest technology gadgets and innovations that are changing the world. From smartphones to smart homes, explore the cutting-edge tech that's shaping our future."
+            },
+            {
+                url: "www.filmreview.com/best-2025",
+                favicon: "https://www.google.com/s2/favicons?domain=filmreview.com",
+                title: "Best Films of 2025 (So Far) - Film Review Magazine",
+                description: "Our critics rank the top films released in 2025 so far. From blockbusters to indie darlings, discover the must-see movies of the year."
+            },
+            {
+                url: "www.indiefilmhub.com/resources",
+                favicon: "https://www.google.com/s2/favicons?domain=indiefilmhub.com",
+                title: "Independent Filmmaking Resources - Indie Film Hub",
+                description: "Essential resources for independent filmmakers. Find funding opportunities, film festival submissions, equipment guides, and networking events."
+            },
+            {
+                url: "www.digitaltrends.com/computing",
+                favicon: "https://www.google.com/s2/favicons?domain=digitaltrends.com",
+                title: "Computing News & Reviews - Digital Trends",
+                description: "Stay updated with the latest computing news, hardware reviews, and software developments. Expert analysis on PC components, laptops, and emerging technologies."
+            },
+            {
+                url: "www.screencraft.org/screenwriting",
+                favicon: "https://www.google.com/s2/favicons?domain=screencraft.org",
+                title: "Screenwriting Fundamentals - ScreenCraft",
+                description: "Master the art of screenwriting with expert tips on structure, character development, dialogue, and formatting. Resources for both beginners and experienced writers."
+            }
+        ];
+
+        // Sample website content
+        const sampleWebsite = `
+            <h1>Best Films of 2025 (So Far)</h1>
+            <div style="color: #666; margin-bottom: 20px;">Updated: May 8, 2025 | Film Review Magazine</div>
+            
+            <p>As we approach the midpoint of 2025, our critics have compiled their picks for the standout films released so far this year. From thought-provoking dramas to groundbreaking sci-fi, here are the movies that have impressed us the most.</p>
+            
+            <h2>1. "Echoes of Tomorrow"</h2>
+            <p>Director: Sarah Chen</p>
+            <p>This contemplative science fiction drama explores the ethical implications of memory transfer technology with stunning visuals and phenomenal performances from its ensemble cast. Chen's direction is masterful, balancing complex philosophical questions with deeply human storytelling.</p>
+            
+            <h2>2. "The Last Station"</h2>
+            <p>Director: Miguel Ortiz</p>
+            <p>Ortiz's period drama set in 1920s rural America offers a powerful meditation on family, legacy, and the passing of an era. The cinematography is breathtaking, capturing the landscape as both character and canvas for the unfolding human drama.</p>
+        `;
+
+        // Go to home page
+        function goToHome() {
+            document.getElementById('homePage').style.display = 'flex';
+            document.getElementById('resultsPage').style.display = 'none';
+            document.getElementById('websitePage').style.display = 'none';
+        }
+
+        // Perform search and show results
+        function performSearch() {
+            const query = document.getElementById('homeSearchInput').value ||
+                document.getElementById('resultsSearchInput').value;
+
+            if (query) {
+                document.getElementById('resultsSearchInput').value = query;
+            }
+
+            const resultsContainer = document.getElementById('searchResults');
+            // Keep only the stats div
+            resultsContainer.innerHTML = '<div class="results-stats" id="resultsStats">About 8,830,000 results (0.54 seconds)</div>';
+
+            if (query.trim() === '') {
+                document.getElementById('resultsStats').textContent = 'Please enter a search term';
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('resultsPage').style.display = 'flex';
+                return;
+            }
+
+            const pages = [
+                {
+                    title: 'Retina - A New Vision of Empathy',
+                    url: 'retina.html',
+                    displayUrl: 'https://www.retina.com',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'Explore the innovative vision of Retina, a platform redefining empathy and connection in the digital age.'
+                },
+                {
+                    title: 'PLEASE STOP USING RETINA – You don\'t know what you\'re giving up - r/ConsciousnessSwapWarnings',
+                    url: 'page1.html',
+                    displayUrl: 'Greddit - r/ConsciousnessSwapWarnings',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'I don\'t know how long this will stay up before it gets taken down (again), so I\'ll keep it short...'
+                },
+                {
+                    title: 'You wanted proof. Fine. Just remember: you asked. -  r/RetinaTruth',
+                    url: 'page2.html',
+                    displayUrl: 'Greddit - r/RetinaTruth',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'People called me paranoid. Conspiracy-pilled. But you wanted proof?...'
+                },
+                {
+                    title: 'Something\'s wrong with my body after a swap. - r/RetinaTruth',
+                    url: 'page3.html',
+                    displayUrl: 'Greddit - r/RetinaTruth',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'I was swapped into a body that was speaking Spanish. I don\'t even speak Spanish...'
+                },
+                {
+                    title: 'Who actually made Retina? - r/FutureTech',
+                    url: 'page4.html',
+                    displayUrl: 'Greddit - r/FutureTech',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'Curious how Retina even works. It feels too advanced...'
+                }
+            ];
+
+            const fakeResults = [
+                {
+                    title: 'Retina: The Future of Vision Technology',
+                    url: 'www.visiontech.com/retina-future',
+                    favicon: "https://www.google.com/s2/favicons?domain=visiontech.com",
+                    description: 'A comprehensive deep dive into how Retina technology is shaping the future of visual experiences and digital interactions across industries.'
+                },
+                {
+                    title: 'Understanding Retina Technology: Technical Overview',
+                    url: 'www.techreview.org/retina-technology',
+                    favicon: "https://www.google.com/s2/favicons?domain=techreview.org",
+                    description: 'An in-depth technical overview of the science and engineering innovations behind Retina technology, including hardware specifications and software architectures.'
+                },
+                {
+                    title: 'Retina and AI Integration: Synergistic Applications',
+                    url: 'www.aijournal.com/retina-integration',
+                    favicon: "https://www.google.com/s2/favicons?domain=aijournal.com",
+                    description: 'Exploring the powerful synergy between Retina technology and advanced artificial intelligence systems for enhanced visual processing and decision making.'
+                },
+                {
+                    title: 'Retina in Healthcare: Revolutionary Diagnostics',
+                    url: 'www.medicalinnovations.net/retina-diagnostics',
+                    favicon: "https://www.google.com/s2/favicons?domain=medicalinnovations.net",
+                    description: 'How Retina technology is revolutionizing medical diagnostics and treatments across specialties, with case studies and clinical validation results.'
+                },
+                {
+                    title: 'The Ethical Implications of Retina Technology',
+                    url: 'www.techethics.edu/retina-ethics',
+                    favicon: "https://www.google.com/s2/favicons?domain=techethics.edu",
+                    description: 'A thoughtful discussion on the moral and ethical questions raised by widespread implementation of Retina technology in various sectors of society.'
+                }
+            ];
+
+            const filteredResults = pages.filter(page =>
+                page.title.toLowerCase().includes(query.toLowerCase()) ||
+                page.description.toLowerCase().includes(query.toLowerCase())
+            );
+
+            const displayResults = filteredResults.length > 0 ? filteredResults : fakeResults;
+
+            // Update results count
+            document.getElementById('resultsStats').textContent =
+                `About ${(Math.floor(Math.random() * 8) + 1).toLocaleString()},${(Math.floor(Math.random() * 900) + 100).toLocaleString()},000 results (${(Math.random() * 0.5 + 0.3).toFixed(2)} seconds)`;
+
+            // Create results
+            displayResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+    <div class="result-url">
+        <img src="${result.favicon}" alt="" class="result-favicon">
+        <span>${result.displayUrl}</span>
+    </div>
+    <a href="${result.url}" class="result-title">${result.title}</a>
+    <div class="result-description">${result.description}</div>
+`;
+
+                resultsContainer.appendChild(resultItem);
+            });
+
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'flex';
+            document.getElementById('websitePage').style.display = 'none';
+        }
+
+        // Open website
+        function openWebsite(url) {
+            // Check if the URL is a relative HTML page
+            if (url.endsWith('.html')) {
+                // Redirect to the actual HTML page
+                window.location.href = url;
+            } else {
+                // For other URLs, show the sample website content
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('resultsPage').style.display = 'none';
+                document.getElementById('websitePage').style.display = 'block';
+
+                // Display website content
+                document.getElementById('websiteContent').innerHTML = sampleWebsite;
+            }
+        }
+
+        // Go back to search results
+        function goBack() {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'flex';
+            document.getElementById('websitePage').style.display = 'none';
+        }
+
+        // Initialize search input when page loads
+        window.onload = function () {
+            document.getElementById('homeSearchInput').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            document.getElementById('resultsSearchInput').addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>

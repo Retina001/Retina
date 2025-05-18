@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RETINA - Found Recording</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #080808;
+            color: #a0a0a0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        #container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        header {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            color: #d5d5d5;
+            margin-bottom: 5px;
+            font-weight: normal;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            font-size: 0.8rem;
+            color: #707070;
+            margin-bottom: 15px;
+        }
+        
+        #recording-id {
+            font-size: 0.7rem;
+            color: #606060;
+            position: absolute;
+            right: 0;
+            top: 5px;
+        }
+        
+        #timestamps {
+            position: absolute;
+            right: 0;
+            top: 25px;
+            font-size: 0.7rem;
+            color: #505050;
+            text-align: right;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 0 10px rgba(120, 255, 220, 0.2);
+            background-color: #0c0c0c;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #transcript-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #333;
+            background-color: rgba(20, 20, 20, 0.7);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        #transcript {
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .highlight {
+            color: #78ffdc;
+            text-shadow: 0 0 5px rgba(120, 255, 220, 0.5);
+        }
+        
+        .distorted {
+            font-style: italic;
+            color: #ff7878;
+        }
+        
+        .whisper {
+            opacity: 0.7;
+        }
+        
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        button {
+            background-color: #202020;
+            color: #a0a0a0;
+            border: 1px solid #444;
+            padding: 8px 15px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #303030;
+            color: #d5d5d5;
+            box-shadow: 0 0 8px rgba(120, 255, 220, 0.4);
+        }
+        
+        #timer {
+            font-size: 0.8rem;
+            color: #707070;
+        }
+        
+        #time-display {
+            color: #78ffdc;
+        }
+        
+        #glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 10;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><filter id="n" x="0" y="0"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="500" height="500" filter="url(%23n)" opacity="0.05"/></svg>');
+        }
+        
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        #status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #78ffdc;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        
+        footer {
+            padding: 10px 20px;
+            font-size: 0.7rem;
+            color: #404040;
+            text-align: center;
+            border-top: 1px solid #222;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0c0c0c;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .retina-warning {
+            color: #ff7878;
+            margin-top: 15px;
+            font-style: italic;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 2s;
+        }
+        
+        #artifact-note {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.6rem;
+            color: #404040;
+            opacity: 0;
+            transition: opacity 3s;
+        }
+    </style>
+</head>
+<body>
+    <div id="glitch-overlay"></div>
+    <div id="container">
+        <header>
+            <h1><span id="status-indicator"></span>RETINA Project</h1>
+            <div class="subtitle">Audio Recovery System</div>
+            <div id="recording-id">ID: RT-378-A1</div>
+            <div id="timestamps">
+                <div>RECORDED: [REDACTED]</div>
+                <div>RECOVERED: 05.16.2025</div>
+        </div>
+        </header>
+        
+        <div class="main-content">
+            <div id="canvas-container">
+                <canvas id="visualizer"></canvas>
+        </div>
+        
+            <div id="transcript-container">
+                <div id="transcript"></div>
+                <div id="artifact-note">TRACE IDENTIFIED: segment contains embedded data patterns</div>
+        </div>
+        
+            <div id="controls">
+                <button id="play-button">► PLAY RECORDING</button>
+                <div id="timer">TIME: <span id="time-display">00:00</span></div>
+        </div>
+        
+            <div class="retina-warning" id="warning">WARNING: RETINA PROJECT DISCONTINUED. ARTIFACT CONTAINS POTENTIAL MEMETIC HAZARD.</div>
+            </div>
+        </div>
+        
+    <footer>
+        PROPERTY OF [REDACTED] RESEARCH DIVISION • UNAUTHORIZED ACCESS PROHIBITED
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Audio context setup
+        let audioContext;
+            let analyser;
+        let dataArray;
+        let source;
+        let isPlaying = false;
+            let startTime;
+            let timerInterval;
+            
+            // Canvas elements
+            const canvas = document.getElementById('visualizer');
+            const canvasCtx = canvas.getContext('2d');
+            
+            // Adjust canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+            // Transcript content
+            const transcriptContent = [
+                { time: 1, text: "I was just trying to clear my head. We fought. Again. He didn't understand. Or maybe I didn't." },
+                { time: 8, text: "<span class='whisper'>I took the bike. I always did when I needed to think. Just one ride. Just a reset. Then the launch. But I wasn't the one who opened my eyes.</span>" },
+                { time: 18, text: "<span class='highlight'>They said I could come back. That the watch would trigger the return. They didn't say what happens... when someone wakes up behind your eyes and doesn't know they're supposed to hit the brakes.</span>" },
+                { time: 30, text: "<span class='distorted'>...impact registered...</span>" },
+                { time: 32, text: "<span class='distorted'>...host terminated...</span>" },
+                { time: 34, text: "<span class='distorted'>...identity unresolved...</span>" },
+                { time: 38, text: "<span class='whisper'>The funeral was... strange. I wanted to be there. I watched it... in someone else's skin.</span>" },
+                { time: 47, text: "<span class='whisper'>I left a trace. Somewhere he might find it—if he's still digging. A screenshot. A test log. Something. Maybe he'll put the pieces together. Maybe he already has.</span>" },
+                { time: 60, text: "<span class='highlight'>If you find this, don't follow what I did. RETINA doesn't give you a new life. It just buries the old one... in someone else's grave.</span>" }
+            ];
+            
+            // Audio oscillator to simulate sound
+            function createOscillator() {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                
+                // Create a mix of oscillators for an eerie sound
+                const oscTypes = ['sine', 'sawtooth'];
+                const oscillators = [];
+                
+                oscTypes.forEach((type, index) => {
+                    const osc = audioContext.createOscillator();
+                    osc.type = type;
+                    
+                    // Different base frequencies
+                    osc.frequency.value = index === 0 ? 110 : 73.42;
+                    
+                    // Create gain node for volume control
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = index === 0 ? 0.2 : 0.05;
+                    
+                    // Connect oscillator to gain and gain to analyser
+                    osc.connect(gainNode);
+                    gainNode.connect(analyser);
+                    
+                    oscillators.push({ osc, gain: gainNode });
+                });
+                
+                // Create noise for static effect
+                const noiseNode = createNoiseGenerator();
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.value = 0.05;
+                noiseNode.connect(noiseGain);
+                noiseGain.connect(analyser);
+                
+                // Connect analyser to destination
+                analyser.connect(audioContext.destination);
+                
+                // Modulate frequencies over time
+                let time = 0;
+                const modulator = setInterval(() => {
+                    if (!isPlaying) {
+                        clearInterval(modulator);
+                        return;
+                    }
+                    
+                    time += 0.01;
+                    
+                    // Gentle sine wave modulation
+                    oscillators[0].osc.frequency.value = 110 + Math.sin(time * 0.2) * 5;
+                    
+                    // More aggressive modulation for the second oscillator
+                    oscillators[1].osc.frequency.value = 73.42 + Math.sin(time * 0.5) * 10;
+                    
+                    // Randomly adjust gain for eerie effect
+                    if (Math.random() < 0.05) {
+                        noiseGain.gain.value = 0.03 + Math.random() * 0.2;
+                        setTimeout(() => {
+                            noiseGain.gain.value = 0.05;
+                        }, 200);
+                    }
+                    
+                    // Create glitches at specific times
+                    const currentTime = (Date.now() - startTime) / 1000;
+                    if (currentTime > 29 && currentTime < 35) {
+                        // Distortion during the "impact registered" section
+                        if (Math.random() < 0.2) {
+                            oscillators[0].gain.gain.value = Math.random() * 0.3;
+                            oscillators[1].gain.gain.value = Math.random() * 0.2;
+                            noiseGain.gain.value = 0.1 + Math.random() * 0.3;
+                            
+                            setTimeout(() => {
+                                oscillators[0].gain.gain.value = 0.2;
+                                oscillators[1].gain.gain.value = 0.05;
+                                noiseGain.gain.value = 0.05;
+                            }, 100);
+                        }
+                    } else if (currentTime > 59) {
+                        // Increasing distortion at the end
+                        noiseGain.gain.value = 0.05 + (currentTime - 59) * 0.02;
+                        
+                        if (currentTime > 68) {
+                            // Final pop and silence
+                            noiseGain.gain.value = 0;
+                            oscillators.forEach(osc => {
+                                osc.gain.gain.value = 0;
+                            });
+                            
+                            clearInterval(modulator);
+                            setTimeout(() => {
+                                stopAudio();
+                            }, 1000);
+                        }
+                    }
+                }, 10);
+                
+                // Start oscillators
+                oscillators.forEach(osc => osc.osc.start());
+                
+                // Prepare analyser data array
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                return {
+                    oscillators,
+                    noiseNode,
+                    noiseGain,
+                    stop: function() {
+                        clearInterval(modulator);
+                        oscillators.forEach(osc => {
+                            try {
+                                osc.osc.stop();
+                            } catch (e) {}
+                        });
+                        noiseNode.disconnect();
+                    }
+                };
+            }
+            
+            // Function to create a noise generator
+            function createNoiseGenerator() {
+                const bufferSize = 2 * audioContext.sampleRate;
+                const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+                noise.loop = true;
+                noise.start(0);
+                
+                return noise;
+            }
+            
+            // Canvas drawing function
+            function draw() {
+                if (!isPlaying) return;
+                
+                requestAnimationFrame(draw);
+                
+                analyser.getByteTimeDomainData(dataArray);
+                
+                // Clear canvas
+                canvasCtx.fillStyle = 'rgba(12, 12, 12, 0.3)';
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set up line style
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = '#78ffdc';
+                canvasCtx.beginPath();
+                
+                // Get playback time to add visual effects
+                const currentTime = (Date.now() - startTime) / 1000;
+                
+                // Draw waveform
+            const sliceWidth = canvas.width / dataArray.length;
+            let x = 0;
+            
+            for (let i = 0; i < dataArray.length; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+                
+                if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                } else {
+                        canvasCtx.lineTo(x, y);
+                }
+                
+                x += sliceWidth;
+            }
+            
+                canvasCtx.lineTo(canvas.width, canvas.height / 2);
+                canvasCtx.stroke();
+                
+                // Add secondary wave with offset and different color during key moments
+                if (currentTime > 17 && currentTime < 25 || currentTime > 59) {
+                    canvasCtx.lineWidth = 1;
+                    canvasCtx.strokeStyle = 'rgba(255, 120, 120, 0.6)';
+                    canvasCtx.beginPath();
+                    
+                    x = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                        const v = (dataArray[(i + 50) % dataArray.length]) / 128.0;
+                        const y = v * canvas.height / 2 + 10;
+                
+                if (i === 0) {
+                            canvasCtx.moveTo(x, y);
+                } else {
+                            canvasCtx.lineTo(x, y);
+                }
+                
+                x += sliceWidth;
+            }
+            
+                    canvasCtx.stroke();
+                }
+                
+                // Add digital glitches during specific moments
+                if ((currentTime > 29 && currentTime < 35) || (currentTime > 65)) {
+                    if (Math.random() < 0.1) {
+                        const glitchHeight = Math.random() * 50 + 20;
+                        const glitchY = Math.random() * (canvas.height - glitchHeight);
+                        
+                        canvasCtx.fillStyle = 'rgba(255, 120, 120, 0.15)';
+                        canvasCtx.fillRect(0, glitchY, canvas.width, glitchHeight);
+                    }
+                }
+                
+                // Update transcript based on time
+                updateTranscript(currentTime);
+            }
+            
+            // Update the visible transcript based on the current time
+            function updateTranscript(currentTime) {
+                const transcript = document.getElementById('transcript');
+                
+                // Find entries that should be visible based on current time
+                let currentEntry = null;
+                for (let i = transcriptContent.length - 1; i >= 0; i--) {
+                    if (currentTime >= transcriptContent[i].time) {
+                        currentEntry = transcriptContent[i];
+                        break;
+                    }
+                }
+                
+                if (currentEntry) {
+                    transcript.innerHTML = currentEntry.text;
+                    transcript.style.opacity = 1;
+                    
+                    // Show artifact note at a specific point
+                    if (currentTime > 47 && currentTime < 55) {
+                        document.getElementById('artifact-note').style.opacity = 0.7;
+            } else {
+                        document.getElementById('artifact-note').style.opacity = 0;
+                    }
+                    
+                    // Show warning at the end
+                    if (currentTime > 60) {
+                        document.getElementById('warning').style.opacity = 1;
+                    }
+            } else {
+                    transcript.style.opacity = 0;
+                }
+            }
+            
+            // Format time for display
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return `${mins}:${secs}`;
+            }
+            
+            // Play/pause button handler
+            let oscillatorSystem;
+            const playButton = document.getElementById('play-button');
+            
+            playButton.addEventListener('click', function() {
+                if (isPlaying) {
+                    stopAudio();
+            } else {
+                    startAudio();
+                }
+            });
+            
+            function startAudio() {
+                // Initialize audio context if needed
+                if (!audioContext) {
+                    try {
+                        oscillatorSystem = createOscillator();
+                        startTime = Date.now();
+                        isPlaying = true;
+                        
+                        // Update UI
+                        playButton.textContent = '■ STOP RECORDING';
+                        document.getElementById('status-indicator').classList.add('pulse');
+                        
+                        // Start timer
+                        timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+                        
+                        // Start visualization
+                        draw();
+                    } catch (e) {
+                        console.error('Audio initialization failed:', e);
+                        alert('Audio could not be initialized. Please try again.');
+                    }
+                } else {
+                    // Resume existing audio
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    
+                    startTime = Date.now() - (parseFloat(document.getElementById('time-display').textContent.split(':')[0]) * 60 + 
+                                 parseFloat(document.getElementById('time-display').textContent.split(':')[1])) * 1000;
+                    isPlaying = true;
+                    
+                    // Update UI
+                    playButton.textContent = '■ STOP RECORDING';
+                    document.getElementById('status-indicator').classList.add('pulse');
+                    
+                    // Start timer
+                    timerInterval = setInterval(updateTimer, 1000);
+                    
+                    // Start visualization
+                    draw();
+                }
+            }
+            
+            function stopAudio() {
+                if (oscillatorSystem) {
+                    oscillatorSystem.stop();
+                }
+                
+                if (audioContext) {
+                    audioContext.suspend();
+                }
+                
+            isPlaying = false;
+                
+                // Update UI
+                playButton.textContent = '► PLAY RECORDING';
+                document.getElementById('status-indicator').classList.remove('pulse');
+                
+                // Stop timer
+                clearInterval(timerInterval);
+            }
+            
+            function updateTimer() {
+                if (!isPlaying) return;
+                
+                const elapsedSeconds = (Date.now() - startTime) / 1000;
+                document.getElementById('time-display').textContent = formatTime(elapsedSeconds);
+                
+                // Simulate end of recording after ~70 seconds
+                if (elapsedSeconds > 70) {
+                    stopAudio();
+                }
+            }
+            
+            // Add periodic UI glitches
+            setInterval(() => {
+                if (Math.random() < 0.05) {
+                    document.getElementById('glitch-overlay').style.opacity = 0.2 + Math.random() * 0.3;
+                    setTimeout(() => {
+                        document.getElementById('glitch-overlay').style.opacity = 0.1;
+                    }, 100);
+                }
+            }, 3000);
+            
+            // Create glitches when hovering over sensitive text
+            document.getElementById('transcript-container').addEventListener('mouseover', function() {
+                if (isPlaying && Math.random() < 0.3) {
+                    document.getElementById('glitch-overlay').style.opacity = 0.2;
+                    setTimeout(() => {
+                        document.getElementById('glitch-overlay').style.opacity = 0.1;
+                    }, 200);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
